@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet Plan Result</title>
+</head>
+<body>
+    <header>
+        <h1>Patient Diet Determining Software</h1>
+        <p>Diet Plan Generated</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/patient_form.html">New Patient</a></li>
+            <li><a href="/reports.html">Reports</a></li>
+            <li><a href="#" id="logoutBtn">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="dietResult">
+            <div class="loading">Loading diet plan...</div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Chitungwiza Central Hospital - Diet System 2.0</p>
+    </footer>
+    <script type="module" src="/src/main.js"></script>
+    <script>
+        const patientData = JSON.parse(sessionStorage.getItem('currentPatient') || '{}');
+
+        if (!patientData.id) {
+            document.getElementById('dietResult').innerHTML = '<p>No patient data found. Please <a href="/patient_form.html">enter patient data</a>.</p>';
+        } else {
+            const dietPlan = patientData.diet_plan;
+
+            document.getElementById('dietResult').innerHTML = `
+                <div class="diet-plan">
+                    <h2>${patientData.name}</h2>
+                    <div class="patient-info">
+                        <p><strong>Age:</strong> ${patientData.age} years</p>
+                        <p><strong>Weight:</strong> ${patientData.weight} kg</p>
+                        <p><strong>BMI:</strong> ${patientData.bmi}</p>
+                        <p><strong>Diagnosis:</strong> ${patientData.diagnosis}</p>
+                        <p><strong>Lifestyle:</strong> ${patientData.lifestyle}</p>
+                    </div>
+
+                    <h3>${dietPlan.title}</h3>
+
+                    <div class="diet-section">
+                        <h4>Dietary Guidelines</h4>
+                        <ul>
+                            ${dietPlan.guidelines.map(g => `<li>${g}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="diet-section">
+                        <h4>Recommended Foods</h4>
+                        <ul>
+                            ${dietPlan.foods_to_eat.map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="diet-section">
+                        <h4>Foods to Avoid</h4>
+                        <ul>
+                            ${dietPlan.foods_to_avoid.map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="diet-section">
+                        <h4>Daily Caloric Intake</h4>
+                        <p>Estimated: ${dietPlan.estimated_daily_calories} calories/day</p>
+                    </div>
+
+                    ${dietPlan.allergy_note ? `<div class="alert">${dietPlan.allergy_note}</div>` : ''}
+
+                    <div class="actions">
+                        <button onclick="window.print()">Print Diet Plan</button>
+                        <button onclick="window.location.href='/patient_form.html'">New Patient</button>
+                        <button onclick="window.location.href='/reports.html'">View All Reports</button>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

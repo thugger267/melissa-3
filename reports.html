@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Reports</title>
+</head>
+<body>
+    <header>
+        <h1>Patient Diet Determining Software</h1>
+        <p>View all patient reports</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/patient_form.html">Enter Patient Data</a></li>
+            <li><a href="#" id="logoutBtn">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section>
+            <h2>Patient Reports</h2>
+            <div id="reportsContainer">
+                <p>Loading reports...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Chitungwiza Central Hospital - Diet System 2.0</p>
+    </footer>
+    <script type="module" src="/src/main.js"></script>
+    <script>
+        if (window.loadReports) {
+            window.loadReports();
+        } else {
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    if (window.loadReports) window.loadReports();
+                }, 500);
+            });
+        }
+    </script>
+</body>
+</html>

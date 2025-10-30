@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet System - Login</title>
+</head>
+<body>
+    <header>
+        <h1>Patient Diet Determining Software</h1>
+        <p>Please login to access the system</p>
+    </header>
+
+    <main>
+        <div class="login-container">
+            <button class="close-btn" onclick="window.location.href='/index.html'" title="Close Form">&times;</button>
+
+            <div class="header">
+                <h2>Diet System Login</h2>
+                <p class="subtitle">Please login to continue</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="login-btn">Login to System</button>
+            </form>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <div class="new-user">
+                <a href="/register.html">New User? Register Here</a>
+            </div>
+        </div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

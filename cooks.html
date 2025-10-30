@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cooks Dashboard - Diet System</title>
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Cooks Dashboard</h1>
+      <div class="header-actions">
+        <a href="/reports.html" class="btn-secondary">My Reports</a>
+        <button id="logoutBtn" class="btn-secondary">Logout</button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div id="loadingMessage">Loading patient reports...</div>
+      <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+      <div id="reportsContainer" style="display: none;">
+        <div class="info-box">
+          <p>View all patient diet plans grouped by diagnosis. Click on any report to view full details.</p>
+        </div>
+
+        <div id="diagnosisGroups"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { supabase } from './src/supabase.js';
+    import { logout, checkIfCook } from './src/auth.js';
+
+    const loadingMessage = document.getElementById('loadingMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    const reportsContainer = document.getElementById('reportsContainer');
+    const diagnosisGroups = document.getElementById('diagnosisGroups');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    async function checkAuth() {
+      const isCook = await checkIfCook();
+      if (!isCook) {
+        window.location.href = '/login.html';
+        return false;
+      }
+      return true;
+    }
+
+    async function loadReports() {
+      try {
+        loadingMessage.style.display = 'block';
+        errorMessage.style.display = 'none';
+        reportsContainer.style.display = 'none';
+
+        const { data: patients, error } = await supabase
+          .from('patients')
+          .select('*')
+          .not('diet_plan', 'is', null)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        loadingMessage.style.display = 'none';
+
+        if (!patients || patients.length === 0) {
+          errorMessage.textContent = 'No patient reports found.';
+          errorMessage.style.display = 'block';
+          return;
+        }
+
+        const groupedByDiagnosis = {};
+        patients.forEach(patient => {
+          const diagnosis = patient.diagnosis || 'Unknown';
+          if (!groupedByDiagnosis[diagnosis]) {
+            groupedByDiagnosis[diagnosis] = [];
+          }
+          groupedByDiagnosis[diagnosis].push(patient);
+        });
+
+        diagnosisGroups.innerHTML = '';
+
+        Object.keys(groupedByDiagnosis).sort().forEach(diagnosis => {
+          const patientsInGroup = groupedByDiagnosis[diagnosis];
+
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'diagnosis-group';
+
+          const groupHeader = document.createElement('div');
+          groupHeader.className = 'diagnosis-header';
+          groupHeader.innerHTML = `
+            <h2>${diagnosis}</h2>
+            <span class="patient-count">${patientsInGroup.length} patient${patientsInGroup.length !== 1 ? 's' : ''}</span>
+          `;
+          groupDiv.appendChild(groupHeader);
+
+          const patientsGrid = document.createElement('div');
+          patientsGrid.className = 'patients-grid';
+
+          patientsInGroup.forEach(patient => {
+            const patientCard = document.createElement('div');
+            patientCard.className = 'patient-card';
+            patientCard.innerHTML = `
+              <div class="patient-card-header">
+                <h3>${patient.name}</h3>
+                <span class="badge">Age: ${patient.age}</span>
+              </div>
+              <div class="patient-info">
+                <p><strong>Weight:</strong> ${patient.weight} kg</p>
+                <p><strong>BMI:</strong> ${patient.bmi ? patient.bmi.toFixed(1) : 'N/A'}</p>
+                ${patient.allergies ? `<p><strong>Allergies:</strong> ${patient.allergies}</p>` : ''}
+              </div>
+              <button class="btn-primary view-report-btn" data-id="${patient.id}">View Full Report</button>
+            `;
+            patientsGrid.appendChild(patientCard);
+          });
+
+          groupDiv.appendChild(patientsGrid);
+          diagnosisGroups.appendChild(groupDiv);
+        });
+
+        reportsContainer.style.display = 'block';
+
+        document.querySelectorAll('.view-report-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const patientId = btn.getAttribute('data-id');
+            window.location.href = `/diet_result.html?id=${patientId}`;
+          });
+        });
+
+      } catch (error) {
+        console.error('Error loading reports:', error);
+        loadingMessage.style.display = 'none';
+        errorMessage.textContent = 'Error loading reports. Please try again.';
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    logoutBtn.addEventListener('click', async () => {
+      await logout();
+      window.location.href = '/login.html';
+    });
+
+    (async () => {
+      const isAuthorized = await checkAuth();
+      if (isAuthorized) {
+        await loadReports();
+      }
+    })();
+  </script>
+</body>
+</html>
